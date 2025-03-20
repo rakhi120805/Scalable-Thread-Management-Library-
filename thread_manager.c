@@ -39,18 +39,25 @@ void* worker(void* arg) {
             return NULL; 
         }
         
-        task = pool->tasks[0];
-        has_task = 1;
-        for (int i = 1; i < pool->task_count; i++) {
+        int max_idx = 0;
+        for(int i = 1; i<pool-> task_count;i++){
+            if(pool-> tasks[i].priority>pool->tasks[max_idx].priority){
+                max_idx=i;
+            }
+        }
+        task = pool->tasks[max_idx];
+        has_task=1;
+        for(int i= max_idx + 1;i<pool->task_count;i++){
             pool->tasks[i - 1] = pool->tasks[i];
         }
         pool->task_count--;
+        
         pthread_mutex_unlock(&pool->mutex);
 
         if (has_task) {
             task.function(task.arg); 
         }
-    }
+    
     return NULL;
 }
 
