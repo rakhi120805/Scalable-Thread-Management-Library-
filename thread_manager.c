@@ -16,6 +16,7 @@ typedef struct {
 
 typedef struct {
     pthread_t threads[MAX_THREADS];
+    int busy[MAX_THREADS];
     Task tasks[MAX_TASKS];
     int task_count;
     int running;
@@ -26,38 +27,39 @@ typedef struct {
 
 void* worker(void* arg) {
     ThreadPool* pool = (ThreadPool*)arg;
+    int id = -1;
+    pthread_mutex_lock(&pool->mutex);
+    for (int i = 0; i < MAX_THREADS; i++) {
+        if (pthread_self() == pool->threads[i]) id = i;
+    }
+    pthread_mutex_unlock(&pool->mutex);
+
     while (1) {
         Task task;
         int has_task = 0;
-
         pthread_mutex_lock(&pool->mutex);
         while (pool->task_count == 0 && pool->running) {
-            pthread_cond_wait(&pool->cond, &pool->mutex); 
+            pool->busy[id] = 0;
+            pthread_cond_wait(&pool->cond, &pool->mutex);
         }
         if (!pool->running && pool->task_count == 0) {
             pthread_mutex_unlock(&pool->mutex);
-            return NULL; 
+            return NULL;
         }
-        
         int max_idx = 0;
-        for(int i = 1; i<pool-> task_count;i++){
-            if(pool-> tasks[i].priority>pool->tasks[max_idx].priority){
-                max_idx=i;
-            }
+        for (int i = 1; i < pool->task_count; i++) {
+            if (pool->tasks[i].priority > pool->tasks[max_idx].priority) max_idx = i;
         }
         task = pool->tasks[max_idx];
-        has_task=1;
-        for(int i= max_idx + 1;i<pool->task_count;i++){
+        has_task = 1;
+        for (int i = max_idx + 1; i < pool->task_count; i++) {
             pool->tasks[i - 1] = pool->tasks[i];
         }
         pool->task_count--;
-        
+        pool->busy[id] = 1;
         pthread_mutex_unlock(&pool->mutex);
-
-        if (has_task) {
-            task.function(task.arg); 
-        }
-    
+        if (has_task) task.function(task.arg);
+    }
     return NULL;
 }
 
@@ -70,6 +72,7 @@ ThreadPool* create_thread_pool() {
     pthread_cond_init(&pool->cond, NULL);
 
     for (int i = 0; i < MAX_THREADS; i++) {
+        pool->busy[i] = 0;
         pthread_create(&pool->threads[i], NULL, worker, pool);
         pthread_detach(pool->threads[i]); 
     }
@@ -114,7 +117,12 @@ int main() {
     add_task(pool, sample_task, (void*)2, 0);
     add_task(pool, sample_task, (void*)3, 2);
 
-    sleep(5); // Let tasks run
+    sleep(5); 
+    printf("Busy threads: ");
+    for(int i=0;i<MAX_THREADS;i++){
+        if(pool->busy[i])printf("%d ",i);
+    }
+    printf("\n");
     destroy_thread_pool(pool);
     printf("Thread pool shut down\n");
     return 0;
