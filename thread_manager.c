@@ -2,14 +2,18 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <unistd.h>
+#include <time.h>
 
 #define MAX_TASKS 10
+#define TIMEOUT_SEC 2
 
 typedef struct {
     void (*function)(void*);
     void* arg;
     int priority;
-    void (*callback)(void*); // Callback on completion
+    void (*callback)(void*);
+    time_t start_time;
+    int timed_out;
 } Task;
 
 typedef struct {
@@ -21,7 +25,33 @@ typedef struct {
     int running;
     pthread_mutex_t mutex;
     pthread_cond_t cond;
+    pthread_t timeout_thread;
 } ThreadPool;
+
+void* timeout_checker(void* arg) {
+    ThreadPool* pool = (ThreadPool*)arg;
+    while (1) {
+        pthread_mutex_lock(&pool->mutex);
+        if (!pool->running && pool->task_count == 0) {
+            pthread_mutex_unlock(&pool->mutex);
+            return NULL;
+        }
+        for (int i = 0; i < pool->task_count; i++) {
+            if (time(NULL) - pool->tasks[i].start_time > TIMEOUT_SEC) {
+                pool->tasks[i].timed_out = 1;
+                printf("Task %ld timed out\n", (long)pool->tasks[i].arg);
+                for (int j = i + 1; j < pool->task_count; j++) {
+                    pool->tasks[j - 1] = pool->tasks[j];
+                }
+                pool->task_count--;
+                i--;
+            }
+        }
+        pthread_mutex_unlock(&pool->mutex);
+        sleep(1);
+    }
+    return NULL;
+}
 
 void* worker(void* arg) {
     ThreadPool* pool = (ThreadPool*)arg;
@@ -55,8 +85,9 @@ void* worker(void* arg) {
         }
         pool->task_count--;
         pool->busy[id] = 1;
+        task.start_time = time(NULL);
         pthread_mutex_unlock(&pool->mutex);
-        if (has_task) {
+        if (has_task && !task.timed_out) {
             task.function(task.arg);
             if (task.callback) task.callback(task.arg);
         }
@@ -78,6 +109,8 @@ ThreadPool* create_thread_pool(int num_threads) {
         pthread_create(&pool->threads[i], NULL, worker, pool);
         pthread_detach(pool->threads[i]);
     }
+    pthread_create(&pool->timeout_thread, NULL, timeout_checker, pool);
+    pthread_detach(pool->timeout_thread);
     return pool;
 }
 
@@ -88,6 +121,8 @@ void add_task(ThreadPool* pool, void (*function)(void*), void* arg, int priority
         pool->tasks[pool->task_count].arg = arg;
         pool->tasks[pool->task_count].priority = priority;
         pool->tasks[pool->task_count].callback = callback;
+        pool->tasks[pool->task_count].start_time = 0;
+        pool->tasks[pool->task_count].timed_out = 0;
         pool->task_count++;
         pthread_cond_signal(&pool->cond);
     }
@@ -108,7 +143,7 @@ void destroy_thread_pool(ThreadPool* pool) {
 
 void sample_task(void* arg) {
     printf("Task %ld running with priority %d\n", (long)arg, (int)(long)arg);
-    sleep(1);
+    sleep(3); 
 }
 
 void sample_callback(void* arg) {
