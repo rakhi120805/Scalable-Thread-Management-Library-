@@ -16,13 +16,22 @@ typedef struct {
     Task *rear;
     pthread_mutex_t mutex;
     pthread_cond_t cond;
+    int done;
 } MessageQueue;
 
 // Initialize the queue
 void initQueue(MessageQueue *queue) {
     queue->front = queue->rear = NULL;
-    pthread_mutex_init(&queue->mutex, NULL);
-    pthread_cond_init(&queue->cond, NULL);
+    queue->done = 0;
+    
+    if (pthread_mutex_init(&queue->mutex, NULL) != 0) {
+        perror("Mutex initialization failed");
+        exit(EXIT_FAILURE);
+    }
+    if (pthread_cond_init(&queue->cond, NULL) != 0) {
+        perror("Condition variable initialization failed");
+        exit(EXIT_FAILURE);
+    }
 }
 
 // Push task to the queue
@@ -46,16 +55,21 @@ void push(MessageQueue *queue, void (*function)(void *), void *arg) {
 // Pop task from the queue
 Task *pop(MessageQueue *queue) {
     pthread_mutex_lock(&queue->mutex);
-    while (queue->front == NULL) {
+    while (queue->front == NULL && !queue->done) {
         pthread_cond_wait(&queue->cond, &queue->mutex);
+        
+        if (queue->front == NULL && queue->done) {
+        pthread_mutex_unlock(&queue->mutex);
+        return NULL;
     }
     Task *task = queue->front;
     queue->front = queue->front->next;
-    if (queue->front == NULL) {
+    if (queue->front == NULL ) {
         queue->rear = NULL;
     }
     pthread_mutex_unlock(&queue->mutex);
     return task;
+    }
 }
 
 // Example task function
@@ -71,15 +85,22 @@ void *producer(void *arg) {
     int taskCount;
 
     printf("Enter the number of tasks to produce: ");
-    scanf("%d", &taskCount);
+    if (scanf("%d", &taskCount) != 1 || taskCount <= 0) {
+        fprintf(stderr, "Invalid input. Exiting.\n");
+        exit(EXIT_FAILURE);
+    }
 
     for (int i = 0; i < taskCount; i++) {
         int *num = (int *)malloc(sizeof(int));
         *num = i;
         push(queue, printTask, num);
         printf("Produced Task %d\n", i);
-        usleep(100000); // 100 ms
+        usleep(200000); 
     }
+    pthread_mutex_lock(&queue->mutex);
+    queue->done = 1;
+    pthread_cond_broadcast(&queue->cond);
+    pthread_mutex_unlock(&queue->mutex);
     return NULL;
 }
 
@@ -91,7 +112,7 @@ void *consumer(void *arg) {
         if (task == NULL) break;
         task->function(task->arg);
         free(task);
-        usleep(150000); // 150 ms
+        usleep(50000); 
     }
     return NULL;
 }
@@ -102,11 +123,20 @@ int main() {
 
     pthread_t producerThread, consumerThread;
 
-    pthread_create(&producerThread, NULL, producer, &queue);
-    pthread_create(&consumerThread, NULL, consumer, &queue);
+    if (pthread_create(&producerThread, NULL, producer, &queue) != 0) {
+        perror("Failed to create producer thread");
+        exit(EXIT_FAILURE);
+    }
+
+    if (pthread_create(&consumerThread, NULL, consumer, &queue) != 0) {
+        perror("Failed to create consumer thread");
+        exit(EXIT_FAILURE);
+    }
+
 
     pthread_join(producerThread, NULL);
     pthread_join(consumerThread, NULL);
-
+    
+    printf("All tasks completed.\n");
     return 0;
 }
