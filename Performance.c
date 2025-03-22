@@ -1,5 +1,6 @@
 #include "Performance.h"
 #include <stdio.h>
+#include <time.h> // Added for clock_gettime, struct timespec, and CLOCK_MONOTONIC
 
 double get_current_time() {
     struct timespec ts;
