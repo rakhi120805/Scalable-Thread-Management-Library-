@@ -41,3 +41,18 @@ This project implements a scalable thread management library in C, designed to h
    ```bash
    git clone https://github.com/rakhi120805/thread-lib.git
    cd thread-lib
+
+
+   ## Integration Update
+- All modules (`Thread.c`, `taskqueue.c`, `Synchronization.c`, `performance.c`) have been integrated into `thread_manager.c`.
+- **New Structure**:
+  - `Thread.c`: Basic thread test.
+  - `MessageQueue.c`: Linked-list-based task queue with priority and timeout (from `Synchronization.c` and `thread_manager.c`).
+  - `Performance.c`: Performance metrics (execution time, throughput).
+  - `thread_manager.c`: Main driver with thread pool, task execution, and performance tracking.
+- The system now supports:
+  - Basic thread creation.
+  - Priority-based task scheduling.
+  - Task timeout (2 seconds).
+  - Performance measurement.
+  - Dynamic thread count.
