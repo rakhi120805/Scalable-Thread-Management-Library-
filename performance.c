@@ -1,56 +1,37 @@
+#include "Performance.h"
 #include <stdio.h>
-#include <stdlib.h>
-#include <pthread.h>
-#include <unistd.h>
 
-#define THREAD_POOL_SIZE 4
-#define TASK_COUNT 10
-
-pthread_mutex_t lock;
-pthread_cond_t cond;
-
-int taskQueue[TASK_COUNT];
-int taskIndex = 0;
-
-void* workerThread(void* arg) {
-    while (1) {
-        pthread_mutex_lock(&lock);
-
-        while (taskIndex >= TASK_COUNT) {
-            pthread_cond_wait(&cond, &lock);
-        }
-
-        int task = taskQueue[taskIndex++];
-        pthread_mutex_unlock(&lock);
-
-        printf("Thread %ld processing task %d\n", pthread_self(), task);
-        sleep(1);
-    }
+double get_current_time() {
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    return ts.tv_sec + ts.tv_nsec / 1e9;
 }
 
-int main() {
-    pthread_t threads[THREAD_POOL_SIZE];
-    pthread_mutex_init(&lock, NULL);
-    pthread_cond_init(&cond, NULL);
+void init_performance_metrics(PerformanceMetrics *metrics) {
+    metrics->start_time = 0;
+    metrics->end_time = 0;
+    metrics->total_time = 0;
+    metrics->tasks_completed = 0;
+}
 
-    for (int i = 0; i < TASK_COUNT; i++) {
-        taskQueue[i] = i + 1;
+void start_timer(PerformanceMetrics *metrics) {
+    metrics->start_time = get_current_time();
+}
+
+void stop_timer(PerformanceMetrics *metrics) {
+    metrics->end_time = get_current_time();
+    metrics->total_time = metrics->end_time - metrics->start_time;
+}
+
+void record_task_completion(PerformanceMetrics *metrics) {
+    metrics->tasks_completed++;
+}
+
+void print_performance_metrics(PerformanceMetrics *metrics) {
+    printf("Performance Metrics:\n");
+    printf("Total Time: %.2f seconds\n", metrics->total_time);
+    printf("Tasks Completed: %d\n", metrics->tasks_completed);
+    if (metrics->total_time > 0) {
+        printf("Throughput: %.2f tasks/second\n", metrics->tasks_completed / metrics->total_time);
     }
-
-    for (int i = 0; i < THREAD_POOL_SIZE; i++) {
-        pthread_create(&threads[i], NULL, workerThread, NULL);
-    }
-
-    pthread_mutex_lock(&lock);
-    taskIndex = 0;
-    pthread_cond_broadcast(&cond);
-    pthread_mutex_unlock(&lock);
-
-    for (int i = 0; i < THREAD_POOL_SIZE; i++) {
-        pthread_join(threads[i], NULL);
-    }
-
-    pthread_mutex_destroy(&lock);
-    pthread_cond_destroy(&cond);
-    return 0;
 }
