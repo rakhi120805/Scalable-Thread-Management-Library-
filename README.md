@@ -56,3 +56,26 @@ This project implements a scalable thread management library in C, designed to h
   - Task timeout (2 seconds).
   - Performance measurement.
   - Dynamic thread count.
+ 
+  ## Build Notes
+- The project uses `clock_gettime` for performance timing, which requires `<time.h>`.
+- On some systems, you may need to link the real-time library with `-lrt`. Use the following command if the default fails:
+  ```bash
+  gcc -o thread_manager thread_manager.c Thread.c MessageQueue.c Performance.c -pthread -lrt
+
+  
+---
+
+### Additional Notes
+- **Why the Error Happened**: `<time.h>` was missing in `Performance.c`, so the compiler couldn’t find the definitions for `struct timespec`, `clock_gettime`, and `CLOCK_MONOTONIC`.
+- **Modern Systems**: On WSL Ubuntu (which is typically a recent version of Ubuntu), `-lrt` is usually not needed because `clock_gettime` is part of `libc`. However, I included the `-lrt` option as a fallback for compatibility.
+- **Future Improvement**: You could add error handling for `clock_gettime` to make the code more robust:
+  ```c
+  double get_current_time() {
+      struct timespec ts;
+      if (clock_gettime(CLOCK_MONOTONIC, &ts) != 0) {
+          perror("clock_gettime failed");
+          return 0;
+      }
+      return ts.tv_sec + ts.tv_nsec / 1e9;
+  }
