@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scalable Thread Management Library - Details</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <h1>Scalable Thread Management Library</h1>
+            <ul>
+                <li><a href="index.html">Back to Main Page</a></li>
+                <li><a href="#file-structure">File Structure</a></li>
+                <li><a href="#team">Team Contributions</a></li>
+                <li><a href="#github">GitHub</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section id="introduction">
+        <h2>Introduction</h2>
+        <p>
+            The Scalable Thread Management Library is a C-based project designed to manage threads efficiently using a thread pool, priority-based task scheduling, and performance monitoring. It leverages POSIX threads (pthreads) to handle dynamic thread creation, task execution, and resource optimization. This project was developed collaboratively by a team as part of a programming assignment.
+        </p>
+    </section>
+
+    <section id="file-structure">
+        <h2>File Structure</h2>
+        <button id="file-toggle">Show Files</button>
+        <div id="file-details" style="display: none;">
+            <ul>
+                <li><strong>Thread.c, Thread.h</strong>: Basic thread creation test.</li>
+                <li><strong>MessageQueue.c, MessageQueue.h</strong>: Linked-list-based task queue with priority and timeout.</li>
+                <li><strong>Performance.c, Performance.h</strong>: Performance metrics (execution time, throughput).</li>
+                <li><strong>thread_manager.c</strong>: Main driver with thread pool, task execution, and performance tracking.</li>
+            </ul>
+        </div>
+    </section>
+
+    <section id="team">
+        <h2>Team Contributions</h2>
+        <div class="team-member" onclick="showThankYou('Rakhi')">
+            <h3>Rakhi (@rakhi120805)</h3>
+            <p>Implemented thread pool, priority scheduling, and integration.</p>
+        </div>
+        <div class="team-member" onclick="showThankYou('Teammate 1')">
+            <h3>Teammate 1</h3>
+            <p>Developed task queue functionality.</p>
+        </div>
+        <div class="team-member" onclick="showThankYou('Teammate 2')">
+            <h3>Teammate 2</h3>
+            <p>Created synchronization mechanisms.</p>
+        </div>
+        <div class="team-member" onclick="showThankYou('Teammate 3')">
+            <h3>Teammate 3</h3>
+            <p>Built performance evaluation module.</p>
+        </div>
+    </section>
+
+    <section id="github">
+        <h2>GitHub Repository</h2>
+        <p>Check out the source code on GitHub:</p>
+        <a href="https://github.com/rakhi120805/Scalable-Thread-Management-Library-" target="_blank">Visit Repository</a>
+    </section>
+
+    <footer>
+        <p>Created by Rakhi and Team | <a href="#" id="back-to-top">Back to Top</a></p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

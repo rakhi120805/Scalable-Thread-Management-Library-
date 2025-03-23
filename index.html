@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scalable Thread Management Library</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <h1>Scalable Thread Management Library</h1>
+            <ul>
+                <li><a href="#what-it-does">What It Does</a></li>
+                <li><a href="#features">Features</a></li>
+                <li><a href="#how-it-works">How It Works</a></li>
+                <li><a href="#usage">Usage</a></li>
+                <li><a href="details.html">Project Details</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section id="what-it-does">
+        <h2>What It Does</h2>
+        <p>
+            The Scalable Thread Management Library is a C-based project that manages threads efficiently using a thread pool. It allows you to schedule tasks with priorities, handle task timeouts, and measure performance metrics like execution time and throughput. This library is ideal for applications that need to process multiple tasks concurrently while optimizing resource usage.
+        </p>
+        <h3>Live Demo: Simulate Thread Pool</h3>
+        <div id="demo">
+            <button id="start-demo">Start Demo</button>
+            <button id="stop-demo" disabled>Stop Demo</button>
+            <div id="thread-pool">
+                <h4>Thread Pool Status</h4>
+                <div id="threads"></div>
+            </div>
+            <div id="task-queue">
+                <h4>Task Queue</h4>
+                <ul id="tasks"></ul>
+            </div>
+        </div>
+    </section>
+
+    <section id="features">
+        <h2>Features</h2>
+        <div class="feature">
+            <h3>Dynamic Thread Pool</h3>
+            <button class="feature-toggle">Show Details</button>
+            <p class="feature-details" style="display: none;">
+                Create a configurable number of threads to handle tasks efficiently, reducing overhead and improving scalability.
+            </p>
+        </div>
+        <div class="feature">
+            <h3>Priority-Based Scheduling</h3>
+            <button class="feature-toggle">Show Details</button>
+            <p class="feature-details" style="display: none;">
+                Tasks are executed based on priority using a linked-list queue, ensuring high-priority tasks are processed first.
+            </p>
+        </div>
+        <div class="feature">
+            <h3>Task Timeout</h3>
+            <button class="feature-toggle">Show Details</button>
+            <p class="feature-details" style="display: none;">
+                Automatically cancels tasks that exceed a 2-second execution time, preventing resource bottlenecks.
+            </p>
+        </div>
+        <div class="feature">
+            <h3>Performance Metrics</h3>
+            <button class="feature-toggle">Show Details</button>
+            <p class="feature-details" style="display: none;">
+                Measures execution time and throughput of tasks, providing insights into the library's efficiency.
+            </p>
+        </div>
+    </section>
+
+    <section id="how-it-works">
+        <h2>How It Works</h2>
+        <p>
+            The library uses a thread pool to manage a fixed number of worker threads. Tasks are added to a priority-based queue, and threads pick up tasks based on their priority. A timeout checker ensures tasks don’t run too long, and performance metrics track the system's efficiency.
+        </p>
+        <div class="diagram">
+            <h3>Process Flow</h3>
+            <div class="step">Add Task → Priority Queue → Thread Pool → Execute → Timeout Check → Performance Metrics</div>
+        </div>
+    </section>
+
+    <section id="usage">
+        <h2>Usage Instructions</h2>
+        <p>Clone the repository:</p>
+        <pre>git clone https://github.com/rakhi120805/Scalable-Thread-Management-Library-.git</pre>
+        <p>Compile the project:</p>
+        <pre>gcc -o thread_manager thread_manager.c Thread.c MessageQueue.c Performance.c -pthread</pre>
+        <p>Run the project:</p>
+        <pre>chmod +x thread_manager
+./thread_manager</pre>
+    </section>
+
+    <footer>
+        <p>Created by Rakhi and Team | <a href="#" id="back-to-top">Back to Top</a></p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
