@@ -33,8 +33,8 @@ This project implements a scalable thread management library in C, designed to h
 ## Team Members
 - **Rakhi (@rakhi120805)**: Implemented `Thread.c` and `thread_manager.c`, focusing on thread creation and producer-consumer task execution.
 - **[Anushka] (22anushkaroy)**: Developed `taskqueue.c` for task management.
-- **[Sneha Tiwari] (Snehatiwarideepti)**: Created `Synchronization.c` for thread safety.
-- **[Anushka] (22anushkaroy)**: Built `performance.c` for performance evaluation.
+- **[Sneha Tiwari] (@Snehatiwarideepti)**: Created `Synchronization.c` for thread safety.
+- **[Anushka] (@22anushkaroy)**: Built `performance.c` for performance evaluation.
 
 ## How to Build and Run
 1. **Clone the Repository**:
@@ -79,3 +79,7 @@ This project implements a scalable thread management library in C, designed to h
       }
       return ts.tv_sec + ts.tv_nsec / 1e9;
   }
+
+## Project Web Pages
+- [Main Page](https://rakhi120805.github.io/Scalable-Thread-Management-Library-/index.html): Overview, live demo, and usage instructions.
+- [Details Page](https://rakhi120805.github.io/Scalable-Thread-Management-Library-/details.html): File structure, team contributions, and GitHub link.
